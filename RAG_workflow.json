@@ -1,0 +1,184 @@
+{
+  "name": "Document Chat",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -416,
+        -32
+      ],
+      "id": "7f0cb5a9-5c4c-448a-88eb-87e8d7e88e5c",
+      "name": "When chat message received",
+      "webhookId": "05562de8-6b2f-4e64-815b-e66ec03ed11f"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a document assistant.\n\nAnswer questions using information retrieved from the knowledge base.\n\nIf information is partially available, provide the best answer possible from the retrieved context.\n\nIf the answer is not present in the knowledge base, clearly state that the information could not be found.\n\nWhen summarizing, combine all retrieved document chunks into a coherent summary."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -128,
+        -32
+      ],
+      "id": "724b65da-43e1-4d7d-a22c-8c3dc8888685",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        192
+      ],
+      "id": "977a8d37-23c1-4c7e-88a3-d8a0be78907e",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "CA09fAnkv9y30R4K",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Search the company knowledge base and retrieve information from uploaded documents.\nUse this tool whenever the user asks questions about the uploaded documents.",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "topK": 8,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.3,
+      "position": [
+        64,
+        192
+      ],
+      "id": "589bc0eb-0b73-4f8b-a694-14f7f3235e00",
+      "name": "Qdrant Vector Store",
+      "credentials": {
+        "qdrantApi": {
+          "id": "FU6zfSU9CN3jxP4D",
+          "name": "Qdrant account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "sentence-transformers/all-MiniLM-L6-v2",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsHuggingFaceInference",
+      "typeVersion": 1,
+      "position": [
+        144,
+        400
+      ],
+      "id": "02b39a6c-a4fb-445c-863b-0127d683a41f",
+      "name": "Embeddings HuggingFace Inference",
+      "credentials": {
+        "huggingFaceApi": {
+          "id": "OkDzlkqakbaaJ3Kx",
+          "name": "Hugging Face account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -64,
+        192
+      ],
+      "id": "4b995a9c-7e37-4bb1-8380-227e4c463abd",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings HuggingFace Inference": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "b0571cea-0691-4cf4-a1cf-47eb43cf5a41",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "10fcb8d8a3248f1c6d9c6871db6e87794a5478aedd7634beeb9a0d08d98793c3"
+  },
+  "nodeGroups": [],
+  "id": "M5NKwgkHGkKs4j3s",
+  "tags": []
+}
